@@ -1,39 +1,64 @@
 package com.usermanagement.usermanagement.controller;
 
+import com.usermanagement.usermanagement.dto.CreateUserDto;
 import com.usermanagement.usermanagement.dto.UserDto;
-import com.usermanagement.usermanagement.entity.User;
-import com.usermanagement.usermanagement.repository.UserRepository;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.usermanagement.usermanagement.services.UserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
+@RequiredArgsConstructor
 public class UserController {
+    private final UserService userService;
 
-    private final UserRepository userRepository;
-
-    public UserController(UserRepository userRepository){
-        this.userRepository=userRepository;
-
+    @GetMapping
+    public String welcome(){
+        return "Welcome to UsersManger";
     }
+
     @GetMapping("/hello")
      public  String sayHello(){
         return "hello world";
     }
-    @GetMapping("/user")
-    public UserDto getUser(){
-        return new UserDto(1L,"sahil","");
-
-    }
 
     @GetMapping("/users")
-    public List<User> getUsers(){
-        return userRepository.findAll();
+    public ResponseEntity<List<UserDto>> getAllUsers(){
+        return ResponseEntity.status(HttpStatus.OK).body(userService.getAllUsers());
     }
 
+    @GetMapping("/users/{id}")
+    public ResponseEntity<UserDto> getUserById(@PathVariable Long id){
+        return ResponseEntity.ok(userService.getUserById(id));
+    }
+
+    @PostMapping
+    public ResponseEntity<UserDto> createNewUser(@RequestBody CreateUserDto req){
+        System.out.println("hello"+req.getPassword()+" "+ req.getPhoneNo());
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.createNewUser(req));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id){
+        userService.deleteUserById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("{id}")
+    public ResponseEntity<UserDto> updateUser(@PathVariable Long id,@RequestBody CreateUserDto req){
+
+        return ResponseEntity.ok(userService.updateUserById(id,req));
+    }
+
+    @PatchMapping("{id}")
+    public ResponseEntity<UserDto> updatePartialUser(@PathVariable Long id ,
+                                                     @RequestBody Map<String,Object> updates){
+        return ResponseEntity.ok(userService.updatePartialUserById(id,updates));
+    }
 
 //    @PostMapping("/api/otp")
 
